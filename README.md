@@ -1,6 +1,6 @@
 # SoccerSimulator
 
-This is the soccer simulator for 4210.  
+This is the soccer simulator for 4210.  Feel free to make changes as you see fit.
 
 ## Compiling
 
