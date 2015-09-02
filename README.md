@@ -6,7 +6,7 @@ This is the soccer simulator for 4210.  Feel free to make changes as you see fit
 
 You will need java 8.
 
-To compile use the command `./sbt compile while in the parent directory.
+To compile use the command `./sbt compile` while in the parent directory.
 
 ## Running
 
