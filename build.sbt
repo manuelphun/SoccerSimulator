@@ -1,4 +1,4 @@
-name := "SoccerSimulator"
+name := "cs1302-fxgame"
 
 version := "1.0"
 
