@@ -15,8 +15,28 @@ import java.util.Random;
  * Purpose: The game simulation.
  *
  * TODO Bug where player does nothing but blocks opposite teams kicking location
+ * TODO Bug Reverse west player boundaries.
  */
 public class SoccerGame extends AnimationTimer {
+
+    protected static final int EMPTY = 0;
+    protected static final int GOAL = 1;
+    protected static final int BALL = 2;
+    protected static final int BOUNDARY = 3;
+    protected static final int TEAMMATE = 6;
+    protected static final int OPPONENT = 7;
+    protected static final int KICK = 9;
+    protected static final int DO_NOTHING = 10;
+
+    protected static final int NW = 0;
+    protected static final int N = 1;
+    protected static final int NE = 2;
+    protected static final int W = 3;
+    protected static final int PLAYER = 4;
+    protected static final int E = 5;
+    protected static final int SW = 6;
+    protected static final int S = 7;
+    protected static final int SE = 8;
 
     private final int FIELD_X_BEGIN = 15;
     private final int FIELD_X_END = 575;
@@ -176,17 +196,17 @@ public class SoccerGame extends AnimationTimer {
             }
 
             if (r == x && s == y)
-                localArea[i] = Team.EMPTY;
+                localArea[i] = EMPTY;
             else if (r < 0 || r > MAX_X || s < 0 || s > MAX_Y)
-                localArea[i] = Team.BOUNDARY;
+                localArea[i] = BOUNDARY;
             else if (grid[r][s] == 0)
-                localArea[i] = Team.EMPTY;
+                localArea[i] = EMPTY;
             else if (grid[r][s] == SOCCER_BALL)
-                localArea[i] = Team.BALL;
+                localArea[i] = BALL;
             else if (grid[r][s] == team)
-                localArea[i] = Team.TEAMMATE;
+                localArea[i] = TEAMMATE;
             else
-                localArea[i] = Team.OPPONENT;
+                localArea[i] = OPPONENT;
         }
     }
 
@@ -238,23 +258,23 @@ public class SoccerGame extends AnimationTimer {
             s = -1;
 
         if (r == -1 && s == 1)
-            dir = Team.NW;
+            dir = NW;
         else if (r == 0 && s == 1)
-            dir = Team.N;
+            dir = N;
         else if (r == 1 && s == 1)
-            dir = Team.NE;
+            dir = NE;
         else if (r == -1 && s == 0)
-            dir = Team.E;
+            dir = E;
         else if (r == 0 && s == 0)
-            dir = Team.PLAYER;
+            dir = PLAYER;
         else if (r == 1 && s == 0)
-            dir = Team.W;
+            dir = W;
         else if (r == -1 && s == -1)
-            dir = Team.SW;
+            dir = SW;
         else if (r == 0 && s == -1)
-            dir = Team.S;
+            dir = S;
         else if (r == 1 && s == -1)
-            dir = Team.SE;
+            dir = SE;
 
         return dir;
     }
@@ -268,28 +288,28 @@ public class SoccerGame extends AnimationTimer {
      */
     public static int swapDir(int direction) {
         switch(direction) {
-            case Team.NW:
-                return (Team.NE);
-            case Team.N:
-                return (Team.N);
-            case Team.NE:
-                return (Team.NW);
-            case Team.E:
-                return (Team.W);
-            case Team.SE:
-                return (Team.SW);
-            case Team.S:
-                return (Team.S);
-            case Team.SW:
-                return (Team.SE);
-            case Team.W:
-                return (Team.E);
-            case Team.KICK:
-                return (Team.KICK);
-            case Team.PLAYER:
-                return (Team.PLAYER);
+            case NW:
+                return (NE);
+            case N:
+                return (N);
+            case NE:
+                return (NW);
+            case E:
+                return (W);
+            case SE:
+                return (SW);
+            case S:
+                return (S);
+            case SW:
+                return (SE);
+            case W:
+                return (E);
+            case KICK:
+                return (KICK);
+            case PLAYER:
+                return (PLAYER);
             default:
-                return (Team.PLAYER);
+                return (PLAYER);
         }
     }
 
@@ -380,19 +400,19 @@ public class SoccerGame extends AnimationTimer {
         switch (i) {
             case 0:
                 playerMove = Main.westTeam.player1(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1]);
+                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
                 break;
             case 1:
                 playerMove = Main.westTeam.player2(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1]);
+                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
                 break;
             case 2:
                 playerMove = Main.westTeam.player3(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1]);
+                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
                 break;
             case 3:
                 playerMove = Main.westTeam.player4(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1]);
+                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
                 break;
         }
         return updateBoard(west.get(i), PLAYER_WEST, i, westTeamLoc[i][0], westTeamLoc[i][1], playerMove);
@@ -411,19 +431,19 @@ public class SoccerGame extends AnimationTimer {
         switch (i) {
             case 0:
                 playerMove = Main.eastTeam.player1(localArea, ballDirection,
-                        eastTeamLoc[i][0], eastTeamLoc[i][1]);
+                        eastTeamLoc[i][0], eastTeamLoc[i][1], ballX, ballY);
                 break;
             case 1:
                 playerMove = Main.eastTeam.player2(localArea, ballDirection,
-                        eastTeamLoc[i][0], eastTeamLoc[i][1]);
+                        eastTeamLoc[i][0], eastTeamLoc[i][1], ballX, ballY);
                 break;
             case 2:
                 playerMove = Main.eastTeam.player3(localArea, ballDirection,
-                        eastTeamLoc[i][0], eastTeamLoc[i][1]);
+                        eastTeamLoc[i][0], eastTeamLoc[i][1], ballX, ballY);
                 break;
             case 3:
                 playerMove = Main.eastTeam.player4(localArea, ballDirection,
-                        eastTeamLoc[i][0], eastTeamLoc[i][1]);
+                        eastTeamLoc[i][0], eastTeamLoc[i][1], ballX, ballY);
                 break;
         }
         return updateBoard(east.get(i), PLAYER_EAST, i, eastTeamLoc[i][0], eastTeamLoc[i][1], playerMove);
@@ -451,31 +471,31 @@ public class SoccerGame extends AnimationTimer {
 
         /* Determines gird space to move player to */
         switch (dir) {
-            case Team.NW : x = beginX - 1;
+            case NW : x = beginX - 1;
                 y =  beginY - 1;
                 break;
-            case Team.N : x = beginX;
+            case N : x = beginX;
                 y =  beginY - 1;
                 break;
-            case Team.NE : x = beginX + 1;
+            case NE : x = beginX + 1;
                 y =  beginY - 1;
                 break;
-            case Team.E : x = beginX - 1;
+            case E : x = beginX - 1;
                 y =  beginY;
                 break;
-            case Team.PLAYER : x = beginX;
+            case PLAYER : x = beginX;
                 y =  beginY;
                 break;
-            case Team.W : x = beginX + 1;
+            case W : x = beginX + 1;
                 y =  beginY;
                 break;
-            case Team.SW : x = beginX - 1;
+            case SW : x = beginX - 1;
                 y =  beginY + 1;
                 break;
-            case Team.S : x = beginX;
+            case S : x = beginX;
                 y =  beginY + 1;
                 break;
-            case Team.SE : x = beginX + 1;
+            case SE : x = beginX + 1;
                 y =  beginY + 1;
                 break;
             default:
@@ -485,7 +505,7 @@ public class SoccerGame extends AnimationTimer {
         }
 
         /* If the player tries to kick the ball and is in a valid spot */
-        if (dir == Team.KICK && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
+        if (dir == KICK && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
                 (team == PLAYER_WEST && x == ballX - 1 && y == ballY))) {
             if (kickBall(team)) {
                 return true;
@@ -493,7 +513,7 @@ public class SoccerGame extends AnimationTimer {
         }
 
         if (x >= 0 && y >= 0 && x < MAX_X - 1 && y < MAX_Y - 1 &&
-                (grid[x][y] == Team.EMPTY || (x == beginX && y == beginY))) {
+                (grid[x][y] == EMPTY || (x == beginX && y == beginY))) {
             player.relocate(FIELD_X_BEGIN + (x * GRID_DIST), FIELD_Y_BEGIN + (y * GRID_DIST));
 
             /* update player grid */

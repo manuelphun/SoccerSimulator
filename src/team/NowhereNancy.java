@@ -1,4 +1,4 @@
-package soccer;
+package team;
 
 import java.util.Random;
 
@@ -13,25 +13,25 @@ public class NowhereNancy implements Team {
     }
 
     @Override
-    public int player1(int[] localArea, int ballDirection, int x, int y) {
+    public int player1(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         Random random = new Random();
         return random.nextInt(8);
     }
 
     @Override
-    public int player2(int[] localArea, int ballDirection, int x, int y) {
+    public int player2(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         Random random = new Random();
         return random.nextInt(8);
     }
 
     @Override
-    public int player3(int[] localArea, int ballDirection, int x, int y) {
+    public int player3(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         Random random = new Random();
         return random.nextInt(8);
     }
 
     @Override
-    public int player4(int[] localArea, int ballDirection, int x, int y) {
+    public int player4(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         Random random = new Random();
         return random.nextInt(8);
     }

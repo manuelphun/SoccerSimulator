@@ -8,6 +8,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.canvas.*;
+import team.Team;
 
 /**
  * Created by Grant Cooksey on 8/23/15.
@@ -83,8 +84,8 @@ public class Main extends Application {
         VBox vbox = new VBox(10);
 
         /* Sets default teams */
-        eastTeam = new NowhereNancy();
-        westTeam = new NowhereNancy();
+        //eastTeam = new NowhereNancy();
+        //westTeam = new NowhereNancy();
 
         /* Graphical representation of the field */
         Canvas canvas = field(GRASS_WIDTH);

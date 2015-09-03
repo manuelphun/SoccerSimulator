@@ -1,4 +1,4 @@
-package soccer;
+package team;
 
 /**
  * Created by grantcooksey on 8/29/15.
@@ -6,7 +6,7 @@ package soccer;
  */
 public class BrutalBeaters implements Team {
     @Override
-    public int player1(int[] localArea, int ballDirection, int x, int y) {
+    public int player1(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         if (ballDirection == PLAYER)
             return KICK;
         else
@@ -14,7 +14,7 @@ public class BrutalBeaters implements Team {
     }
 
     @Override
-    public int player2(int[] localArea, int ballDirection, int x, int y) {
+    public int player2(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         if (ballDirection == PLAYER)
             return KICK;
         else
@@ -22,7 +22,7 @@ public class BrutalBeaters implements Team {
     }
 
     @Override
-    public int player3(int[] localArea, int ballDirection, int x, int y) {
+    public int player3(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         if (ballDirection == PLAYER)
             return KICK;
         else
@@ -30,7 +30,7 @@ public class BrutalBeaters implements Team {
     }
 
     @Override
-    public int player4(int[] localArea, int ballDirection, int x, int y) {
+    public int player4(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY) {
         if (ballDirection == PLAYER)
             return KICK;
         else

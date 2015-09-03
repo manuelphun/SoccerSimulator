@@ -1,5 +1,7 @@
 package soccer;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -8,6 +10,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import team.Team;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,19 +19,27 @@ import java.util.List;
 /**
  * Created by grantcooksey on 8/25/15.
  * Purpose: Creates the Pane to display scores and select teams.
+ *
+ * TODO for dynamic loading
  */
 public class SimulationPane extends VBox {
 
     public static final String SCORE_TEXT_SPACE = "       ";
+    private final String TEAM_PACKAGE = "team.";
 
     protected static int eastScore, westScore;
     protected static Text scores;
     private ArrayList<Class<Team>> teamClass;
     private SoccerGame simulation;
     private Text eastName, westName;
+    private String[] teamNames;
 
     public SimulationPane() {
         super(10);
+
+        /* Retrieves all the Java Team classes and loads them */
+        teamNames = findTeams();
+        loadTeams(teamNames);
 
         simulation = new SoccerGame();
 
@@ -45,11 +56,6 @@ public class SimulationPane extends VBox {
      */
     private BorderPane initializeOptionPane() {
         BorderPane borderPane = new BorderPane();
-
-        /* Retrieves all the Java Team classes and loads them */
-        String[] teamNames;
-        teamNames = findTeams();
-        loadTeams(teamNames);
 
         /* sets combo boxes for selecting teamNames */
         ComboBox<String> selectEastTeam, selectWestTeam;
@@ -69,9 +75,19 @@ public class SimulationPane extends VBox {
         VBox vBox = new VBox(4);
         HBox hBox = new HBox(2);
         Button playButton = new Button("Play");
-        playButton.setOnAction(e -> simulation.run());
+        playButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                simulation.run();
+            }
+        });
+        //playButton.setOnAction(e -> simulation.run());
         Button stopButton = new Button("Stop");
-        stopButton.setOnAction(e -> simulation.stop());
+        stopButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                simulation.stop();
+            }
+        });
+        //stopButton.setOnAction(e -> simulation.stop());
         hBox.setAlignment(Pos.CENTER);
         hBox.getChildren().addAll(playButton, stopButton);
 
@@ -83,6 +99,22 @@ public class SimulationPane extends VBox {
                 "Fast" //,
                 //"Instant"
         );
+        selectSpeed.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                switch (selectSpeed.getValue()) {
+                    case "Slow":
+                        SoccerGame.timeSetting = SoccerGame.TIMER_SLOW;
+                        break;
+                    case "Normal":
+                        SoccerGame.timeSetting = SoccerGame.TIMER_NORMAL;
+                        break;
+                    case "Fast":
+                        SoccerGame.timeSetting = SoccerGame.TIMER_FAST;
+                        break;
+                }
+            }
+        });
+        /*
         selectSpeed.setOnAction(event -> {
             switch (selectSpeed.getValue()) {
                 case "Slow":
@@ -94,13 +126,14 @@ public class SimulationPane extends VBox {
                 case "Fast":
                     SoccerGame.timeSetting = SoccerGame.TIMER_FAST;
                     break;
-                /*
+
                 case "Instant":
                     SoccerGame.timeSetting = SoccerGame.TIMER_INSTANT;
                     break;
-                */
+
             }
         });
+        */
         selectSpeed.setPromptText("Set Speed");
 
         vBox.setAlignment(Pos.CENTER);
@@ -122,24 +155,43 @@ public class SimulationPane extends VBox {
     /**
      * Dynamically loads Team classes into the program. Classes are
      * added to teamClass.  It is assumed that the classes loaded implement Team.
+     * Chooses one of the teams as the default team.  If no teams are able to load,
+     * the program will exit.
      *
      * @param teamName String array of .class file names
      */
     private void loadTeams(String[] teamName) {
         ClassLoader classLoader = SimulationPane.class.getClassLoader();
         teamClass = new ArrayList<Class<Team>>();
-        String name;
+        String name, packageName;
 
         for (int i = 0; i < teamName.length; ++i) {
-            name = "soccer." + teamName[i];
+            name = TEAM_PACKAGE + teamName[i];
             try {
                 Class aClass = classLoader.loadClass(name);
                 teamClass.add(aClass);
-                //System.out.println(teamClass.get(0).getName());
+                //System.out.println(teamClass.get(i).getName());
             }
             catch (ClassNotFoundException e) {
-                System.out.println("Your class failed to load.");
+                System.out.println("Class " + name +" failed to load.");
             }
+        }
+
+        if (teamClass.size() > 0) {
+            try {
+                Main.eastTeam = teamClass.get(0).newInstance();
+                //eastName.setText(Main.eastTeam.teamName());
+                Main.westTeam = teamClass.get(0).newInstance();
+                //westName.setText(Main.westTeam.teamName());
+            } catch (IllegalAccessException e1) {
+                System.out.println("Something went wrong.");
+            } catch (InstantiationException e2) {
+                System.out.println("Something went wrong.");
+            }
+        }
+        else {
+            System.out.println("No teams were found.");
+            System.exit(0);
         }
     }
 
@@ -150,49 +202,56 @@ public class SimulationPane extends VBox {
      * @param team direction
      */
     private void setTeam(ComboBox<String> comboBox, final int team) {
-        comboBox.setOnAction(e -> {
-            /* restarts simulation and updates score */
-            eastScore = 0;
-            westScore = 0;
-            updateScore();
-            simulation.restart();
+        comboBox.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                /* restarts simulation and updates score */
+                eastScore = 0;
+                westScore = 0;
+                updateScore();
+                simulation.restart();
 
-            String name = comboBox.getValue();
+                String name = comboBox.getValue();
 
             /* finds the index of the selected value in teamClass */
-            int teamIndex = 0;
-            for (int i = 0; i < teamClass.size(); ++i) {
-                if (teamClass.get(i).getName().equals("soccer." + name)) {
-                    teamIndex = i;
+                int teamIndex = 0;
+                for (int i = 0; i < teamClass.size(); ++i) {
+                    if (teamClass.get(i).getName().equals(TEAM_PACKAGE + name)) {
+                        teamIndex = i;
+                    }
                 }
-            }
 
             /* Loads Class */
-            if (team == SoccerGame.PLAYER_WEST) {
-                try {
-                    Main.eastTeam = teamClass.get(teamIndex).newInstance();
-                    eastName.setText(Main.eastTeam.teamName());
+                if (team == SoccerGame.PLAYER_WEST) {
+                    try {
+                        Main.eastTeam = teamClass.get(teamIndex).newInstance();
+                        eastName.setText(Main.eastTeam.teamName());
+                    }
+                    catch (IllegalAccessException e1) {
+                        System.out.println("Something went wrong.");
+                    }
+                    catch (InstantiationException e2) {
+                        System.out.println("Something went wrong.");
+                    }
                 }
-                catch (IllegalAccessException e1) {
-                    System.out.println("Something went wrong.");
-                }
-                catch (InstantiationException e2) {
-                    System.out.println("Something went wrong.");
-                }
-            }
-            else {
-                try {
-                    Main.westTeam = teamClass.get(teamIndex).newInstance();
-                    westName.setText(Main.westTeam.teamName());
-                }
-                catch (InstantiationException e1) {
-                    System.out.println("Something went wrong.");
-                }
-                catch (IllegalAccessException e2) {
-                    System.out.println("Something went wrong.");
+                else {
+                    try {
+                        Main.westTeam = teamClass.get(teamIndex).newInstance();
+                        westName.setText(Main.westTeam.teamName());
+                    }
+                    catch (InstantiationException e1) {
+                        System.out.println("Something went wrong.");
+                    }
+                    catch (IllegalAccessException e2) {
+                        System.out.println("Something went wrong.");
+                    }
                 }
             }
         });
+        /*
+        comboBox.setOnAction(e -> {
+
+        });
+        */
     }
 
     /**

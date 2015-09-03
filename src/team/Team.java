@@ -1,4 +1,4 @@
-package soccer;
+package team;
 
 /**
  * Created by Grant Cooksey on 8/23/15.
@@ -15,7 +15,7 @@ package soccer;
  * from opposite teams are in a valid position to kick the ball and kick at the same time, the kick will be
  * random. When moving players, they cannot move through the ball, out of bounds, or through another player.
  * If the player gets stuck behind the ball or a teammate, the player functions must account for this and
- * and adjust directions.  If the ball gets suck the pot will be called a draw.
+ * and adjust directions.  If the ball gets suck the game will be called a draw.
  */
 public interface Team {
 
@@ -51,10 +51,12 @@ public interface Team {
      *                      if in a valid kicking position.
      * @param x location of player on the x axis.
      * @param y location of player on the y axis.
+     * @param ballX location of ball on the x axis.
+     * @param ballY location of the ball on the y axis.
      *
      * @return an int representing direction to move or kick ball
      */
-    int player1(int[] localArea, int ballDirection, int x, int y);
+    int player1(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY);
 
     /**
      * Represents the strategy for player 2.
@@ -69,11 +71,13 @@ public interface Team {
      *                      if in a valid kicking position.
      * @param x location of player on the x axis.
      * @param y location of player on the y axis.
+     * @param ballX location of ball on the x axis.
+     * @param ballY location of the ball on the y axis.
      *
      * @return an int N, NE, E,.. etc. representing direction to move, KICK to kick the ball,
      *         or DO_NOTHING to do nothing
      */
-    int player2(int[] localArea, int ballDirection, int x, int y);
+    int player2(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY);
 
     /**
      * Represents the strategy for player 3.
@@ -88,10 +92,12 @@ public interface Team {
      *                      if in a valid kicking position.
      * @param x location of player on the x axis.
      * @param y location of player on the y axis.
+     * @param ballX location of ball on the x axis.
+     * @param ballY location of the ball on the y axis.
      *
      * @return an int representing direction to move or kick ball
      */
-    int player3(int[] localArea, int ballDirection, int x, int y);
+    int player3(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY);
 
     /**
      * Represents the strategy for player 4.
@@ -106,10 +112,12 @@ public interface Team {
      *                      if in a valid kicking position.
      * @param x location of player on the x axis.
      * @param y location of player on the y axis.
+     * @param ballX location of ball on the x axis.
+     * @param ballY location of the ball on the y axis.
      *
      * @return an int representing direction to move or kick ball
      */
-    int player4(int[] localArea, int ballDirection, int x, int y);
+    int player4(int[] localArea, int ballDirection, int x, int y, int ballX, int ballY);
 
     /**
      * The team name.
