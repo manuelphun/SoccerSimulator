@@ -14,5 +14,5 @@ To run the program use the command `./sbt run`.
 
 ## Entering Teams
 
-Two sample teams have been included, BrutalBeaters and the default team NowhereNancy.  To add your own team, you must implement the Team interface located in `src/main/java` and make sure the class is in the package `soccer`.  Place the compiled `.class` file in the parent directory and the `.java` source code in `src/main/java`.
+Two sample teams have been included, BrutalBeaters and the default team NowhereNancy.  To add your own team, you must implement the Team interface located in `src/main/java`.  Place the compiled `.class` file in the parent directory.
 
