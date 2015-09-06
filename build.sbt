@@ -4,6 +4,8 @@ version := "1.0"
 
 autoScalaLibrary := false
 
+mainClass in (Compile,run) := Some("Main")
+
 unmanagedSourceDirectories in Compile <<= Seq(javaSource in Compile).join
 
 unmanagedSourceDirectories in Test <<= Seq(javaSource in Test).join
