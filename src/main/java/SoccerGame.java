@@ -13,7 +13,6 @@ import java.util.Random;
  * Purpose: The game simulation.
  *
  * TODO Bug where player does nothing but blocks opposite teams kicking location
- * TODO Bug Reverse west player boundaries.
  */
 public class SoccerGame extends AnimationTimer {
 
@@ -195,7 +194,7 @@ public class SoccerGame extends AnimationTimer {
 
             if (r == x && s == y)
                 localArea[i] = EMPTY;
-            else if (r < 0 || r > MAX_X || s < 0 || s > MAX_Y)
+            else if (r < 0 || r > MAX_X - 2 || s < 0 || s > MAX_Y - 2)
                 localArea[i] = BOUNDARY;
             else if (grid[r][s] == 0)
                 localArea[i] = EMPTY;
@@ -205,6 +204,22 @@ public class SoccerGame extends AnimationTimer {
                 localArea[i] = TEAMMATE;
             else
                 localArea[i] = OPPONENT;
+        }
+
+        if (team == PLAYER_WEST) {
+            swapLocalArea();
+        }
+    }
+
+    /**
+     * Swaps the local area of the local area method.
+     */
+    private void swapLocalArea() {
+        int temp = 0;
+        for (int i = 0; i < 9; i += 3) {
+            temp = localArea[i];
+            localArea[i] = localArea[i + 2];
+            localArea[i + 2] = temp;
         }
     }
 
