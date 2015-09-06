@@ -1,5 +1,3 @@
-package soccer;
-
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -8,7 +6,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.canvas.*;
-import team.Team;
 
 /**
  * Created by Grant Cooksey on 8/23/15.

@@ -1,5 +1,3 @@
-package team;
-
 /**
  * Created by Grant Cooksey on 8/23/15.
  * Purpose: An interface representing a team.

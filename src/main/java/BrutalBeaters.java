@@ -1,5 +1,3 @@
-package team;
-
 /**
  * Created by grantcooksey on 8/29/15.
  * Purpose: The most straight forward Brute force approach.  Does not handle players getting in the way.

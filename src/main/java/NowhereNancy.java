@@ -1,5 +1,3 @@
-package team;
-
 import java.util.Random;
 
 /**
