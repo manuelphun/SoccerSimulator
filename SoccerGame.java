@@ -17,8 +17,10 @@ public class SoccerGame {
     protected static final int BOUNDARY = 3;
     protected static final int TEAMMATE = 6;
     protected static final int OPPONENT = 7;
-    protected static final int KICK = 9;
-    protected static final int DO_NOTHING = 10;
+    protected static final int KICK_E = 9;
+    protected static final int KICK_N = 10;
+    protected static final int KICK_W = 11;
+    protected static final int KICK_S = 12;
 
     protected static final int NW = 0;
     protected static final int N = 1;
@@ -549,9 +551,9 @@ public class SoccerGame {
 
 
         /* If the player tries to kick the ball and is in a valid spot */
-        if (dir == KICK && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
+        if (dir == KICK_E && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
                 (team == PLAYER_WEST && x == ballX - 1 && y == ballY))) {
-            if (kickBall(team)) {
+            if (kickBall(team, dir)) {
                 return true;
             }
         }
@@ -585,10 +587,11 @@ public class SoccerGame {
      * Kicks the ball randomly in the direction of a particular team.
      *
      * @param team who is kicking the ball
+     * @param direction ball is kicked
      *
      * @return returns true if point was scored, otherwise, false
      */
-    private boolean kickBall(int team) {
+    private boolean kickBall(int team, int kickDir) {
         int newBallX = 0, newBallY = 0;
         Random random = new Random();
         boolean won = false;
@@ -673,8 +676,8 @@ public class SoccerGame {
                 return (SE);
             case W:
                 return (E);
-            case KICK:
-                return (KICK);
+            case KICK_E:
+                return (KICK_E);
             case PLAYER:
                 return (PLAYER);
             default:

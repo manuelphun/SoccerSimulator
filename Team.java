@@ -26,8 +26,10 @@ public interface Team {
     public static final int BOUNDARY = 3;
     public static final int TEAMMATE = 6;
     public static final int OPPONENT = 7;
-    public static final int KICK = 9;
-    public static final int DO_NOTHING = 10;
+    public static final int KICK_E = 9;
+    public static final int KICK_N = 10;
+    public static final int KICK_W = 11;
+    public static final int KICK_S = 12;
 
     public static final int NW = 0;
     public static final int N = 1;
