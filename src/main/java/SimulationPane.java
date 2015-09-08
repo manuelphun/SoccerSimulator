@@ -14,31 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by grantcooksey on 8/25/15.
+ * Created by Grant Cooksey on 8/25/15.
  * Purpose: Creates the Pane to display scores and select teams.
- *
- * TODO for dynamic loading
  */
 public class SimulationPane extends VBox {
 
     public static final String SCORE_TEXT_SPACE = "       ";
-    private final String TEAM_PACKAGE = "";//"team.";
 
     protected static int eastScore, westScore;
     protected static Text scores;
-    private ArrayList<Class<Team>> teamClass;
-    private SoccerGame simulation;
+    private TeamLoader teamLoader;
+    private SoccerGUI simulation;
     private Text eastName, westName;
-    private String[] teamNames;
 
     public SimulationPane() {
         super(10);
 
-        /* Retrieves all the Java Team classes and loads them */
-        teamNames = findTeams();
-        loadTeams(teamNames);
+        teamLoader = new TeamLoader();
 
-        simulation = new SoccerGame();
+        simulation = new SoccerGUI();
 
         BorderPane scorePane = initializeScorePane();
         BorderPane optionPane = initializeOptionPane();
@@ -58,6 +52,8 @@ public class SimulationPane extends VBox {
         ComboBox<String> selectEastTeam, selectWestTeam;
         selectEastTeam = new ComboBox<String>();
         selectWestTeam = new ComboBox<String>();
+
+        String[] teamNames = teamLoader.getTeamNames();
 
         for (int i = 0; i < teamNames.length; ++i) {
             selectEastTeam.getItems().add(teamNames[i]);
@@ -100,13 +96,13 @@ public class SimulationPane extends VBox {
             public void handle(ActionEvent t) {
                 switch (selectSpeed.getValue()) {
                     case "Slow":
-                        SoccerGame.timeSetting = SoccerGame.TIMER_SLOW;
+                        SoccerGUI.timeSetting = SoccerGUI.TIMER_SLOW;
                         break;
                     case "Normal":
-                        SoccerGame.timeSetting = SoccerGame.TIMER_NORMAL;
+                        SoccerGUI.timeSetting = SoccerGUI.TIMER_NORMAL;
                         break;
                     case "Fast":
-                        SoccerGame.timeSetting = SoccerGame.TIMER_FAST;
+                        SoccerGUI.timeSetting = SoccerGUI.TIMER_FAST;
                         break;
                 }
             }
@@ -150,49 +146,6 @@ public class SimulationPane extends VBox {
     }
 
     /**
-     * Dynamically loads Team classes into the program. Classes are
-     * added to teamClass.  It is assumed that the classes loaded implement Team.
-     * Chooses one of the teams as the default team.  If no teams are able to load,
-     * the program will exit.
-     *
-     * @param teamName String array of .class file names
-     */
-    private void loadTeams(String[] teamName) {
-        ClassLoader classLoader = SimulationPane.class.getClassLoader();
-        teamClass = new ArrayList<Class<Team>>();
-        String name, packageName;
-
-        for (int i = 0; i < teamName.length; ++i) {
-            name = TEAM_PACKAGE + teamName[i];
-            try {
-                Class aClass = classLoader.loadClass(name);
-                teamClass.add(aClass);
-                //System.out.println(teamClass.get(i).getName());
-            }
-            catch (ClassNotFoundException e) {
-                System.out.println("Class " + name +" failed to load.");
-            }
-        }
-
-        if (teamClass.size() > 0) {
-            try {
-                Main.eastTeam = teamClass.get(0).newInstance();
-                //eastName.setText(Main.eastTeam.teamName());
-                Main.westTeam = teamClass.get(0).newInstance();
-                //westName.setText(Main.westTeam.teamName());
-            } catch (IllegalAccessException e1) {
-                System.out.println("Something went wrong.");
-            } catch (InstantiationException e2) {
-                System.out.println("Something went wrong.");
-            }
-        }
-        else {
-            System.out.println("No teams were found.");
-            System.exit(0);
-        }
-    }
-
-    /**
      * Sets the action listener for the combobox to use a dynamically loaded class
      *
      * @param comboBox that needs action listener set
@@ -209,15 +162,17 @@ public class SimulationPane extends VBox {
 
                 String name = comboBox.getValue();
 
-            /* finds the index of the selected value in teamClass */
+                ArrayList<Class<Team>> teamClass = teamLoader.getTeamClass();
+
+                /* finds the index of the selected value in teamClass */
                 int teamIndex = 0;
                 for (int i = 0; i < teamClass.size(); ++i) {
-                    if (teamClass.get(i).getName().equals(TEAM_PACKAGE + name)) {
+                    if (teamClass.get(i).getName().equals(TeamLoader.TEAM_PACKAGE + name)) {
                         teamIndex = i;
                     }
                 }
 
-            /* Loads Class */
+                /* Loads Class */
                 if (team == SoccerGame.PLAYER_WEST) {
                     try {
                         Main.eastTeam = teamClass.get(teamIndex).newInstance();
@@ -249,37 +204,6 @@ public class SimulationPane extends VBox {
 
         });
         */
-    }
-
-    /**
-     * Finds the .class team files
-     *
-     * @return string array of file names
-     */
-    private String[] findTeams() {
-        String path = ".";
-        String fileName;
-        List<String> teamFilesList = new ArrayList<String>();
-        File folder = new File(path);
-        File[] files = folder.listFiles();
-
-        for (int i = 0; i < files.length; ++i) {
-            if (files[i].isFile()) {
-                fileName = files[i].getName();
-                if (fileName.endsWith(".class")) {
-                    teamFilesList.add(fileName);
-                }
-            }
-        }
-
-        String[] teamFiles = new String[teamFilesList.size()];
-        teamFiles = teamFilesList.toArray(teamFiles);
-
-        for (int i = 0; i < teamFiles.length; ++i) {
-            teamFiles[i] = teamFiles[i].substring(0, teamFiles[i].length() - 6);
-        }
-
-        return teamFiles;
     }
 
     /**

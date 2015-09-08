@@ -108,6 +108,14 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        //SoccerBatch soccerBatch = new SoccerBatch();
+
+        if (args.length == 1 && args[0].equals("batch")) {
+            SoccerBatch soccerBatch = new SoccerBatch();
+        }
+        else {
+            launch(args);
+        }
+
     }
 }

@@ -13,7 +13,10 @@
  * from opposite teams are in a valid position to kick the ball and kick at the same time, the kick will be
  * random. When moving players, they cannot move through the ball, out of bounds, or through another player.
  * If the player gets stuck behind the ball or a teammate, the player functions must account for this and
- * and adjust directions.  If the ball gets suck the game will be called a draw.
+ * and adjust directions.  
+ *
+ * Update : ballDirection will always to attempt to direct to an lead to an open space closest to the direction 
+ * of the ball. If all spaces are blocked, the player will not move.
  */
 public interface Team {
 

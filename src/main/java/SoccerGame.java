@@ -1,20 +1,15 @@
-import javafx.animation.AnimationTimer;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Stack;
 
 /**
- * Created by grantcooksey on 8/25/15.
- * Purpose: The game simulation.
- *
- * TODO Bug where player does nothing but blocks opposite teams kicking location
+ * Created by Grant Cooksey on 8/25/15.
+ * Purpose: Maintains the Soccer Simulation.  Provides methods to update the game based on the player algorithms.
  */
-public class SoccerGame extends AnimationTimer {
+public class SoccerGame {
+
+    protected static final int BATCH = 1;
+    protected static final int GUI = 2;
 
     protected static final int EMPTY = 0;
     protected static final int GOAL = 1;
@@ -34,70 +29,32 @@ public class SoccerGame extends AnimationTimer {
     protected static final int SW = 6;
     protected static final int S = 7;
     protected static final int SE = 8;
-
-    private final int FIELD_X_BEGIN = 15;
-    private final int FIELD_X_END = 575;
-    private final int FIELD_Y_BEGIN = 5;
-    private final int FIELD_Y_END = 285;
-    private final int MAX_X = 58;
-    private final int MAX_Y = 30;
-    private final int START_DIST_FROM_MIDDLE = 13;
-    private final int SOCCER_BALL = 3;
-    private final int GRID_DIST = 10;
-    private final int PAUSE_TIMER = 100;
-
-    protected static final int TIMER_INSTANT = 0;
-    protected static final int TIMER_FAST = 2;
-    protected static final int TIMER_NORMAL = 15;
-    protected static final int TIMER_SLOW = 25;
-    protected static int timeSetting;
     protected static final int PLAYER_EAST = 1;
     protected static final int PLAYER_WEST = 2;
 
-    private ArrayList<Rectangle> east;
-    private ArrayList<Rectangle> west;
-    private Circle ball;
-    private int timer;
-    private int resetGameTimer;
+    protected static final int MAX_X = 58;
+    protected static final int MAX_Y = 30;
+    protected static final int START_DIST_FROM_MIDDLE = 13;
+    protected final int SOCCER_BALL = 3;
+
     private static int[][] grid;
     private static int[][] eastTeamLoc;
-    private static boolean[] eastTeamStuck;
-    private static boolean[] westTeamStuck;
     private static int[][] westTeamLoc;
     private int[] localArea;
     private int ballDirection;
     private int ballX;
     private int ballY;
-    private int playerMove;
+    private int moveX;
+    private int moveY;
+    private int playerIndex;
+    private boolean ballMoved;
 
     /* Constructor */
     public SoccerGame() {
-        timer = 0;
-        timeSetting = TIMER_NORMAL;
         grid = new int[MAX_X][MAX_Y];
         eastTeamLoc = new int[4][2];
-        eastTeamStuck = new boolean[4];
         westTeamLoc = new int[4][2];
-        westTeamStuck = new boolean[4];
         localArea = new int[9];
-
-        east = new ArrayList<Rectangle>();
-        west = new ArrayList<Rectangle>();
-        for (int i = 0; i < 4; i++) {
-            east.add(new Rectangle(10, 10, Color.BLUE));
-            east.get(i).setStroke(Color.BLACK);
-            east.get(i).setStrokeWidth(1);
-            west.add(new Rectangle(10, 10, Color.RED));
-            west.get(i).setStroke(Color.BLACK);
-            west.get(i).setStrokeWidth(1);
-        }
-        ball = new Circle(5, Color.PURPLE);
-        Main.game.getChildren().addAll(ball);
-        for (int i  = 0; i < 4; ++i) {
-            Main.game.getChildren().addAll(east.get(i), west.get(i));
-        }
-
-        setGame();
     }
 
     /**
@@ -106,15 +63,11 @@ public class SoccerGame extends AnimationTimer {
      * should be called at the start of the game and between points.
      * If it is between points, the game will be started automatically.
      */
-    private void setGame() {
+    public void setGame() {
         /* clears grid */
         for (int i = 0; i < MAX_X; ++i) {
             Arrays.fill(grid[i], 0);
         }
-
-        /* sets all players to not be stuck */
-        Arrays.fill(eastTeamStuck, false);
-        Arrays.fill(westTeamStuck, false);
 
         /* places players on the field and updates grid */
         int distY, eastDistX, westDistX;
@@ -122,10 +75,6 @@ public class SoccerGame extends AnimationTimer {
             distY = (i * 6) + 5;
             eastDistX = MAX_X / 2 + START_DIST_FROM_MIDDLE;
             westDistX = (MAX_X / 2 - START_DIST_FROM_MIDDLE) - 1;
-            east.get(i).relocate(FIELD_X_BEGIN + (eastDistX * GRID_DIST),
-                    (distY * GRID_DIST) + FIELD_Y_BEGIN);
-            west.get(i).relocate(FIELD_X_BEGIN + (westDistX * GRID_DIST),
-                    (distY * GRID_DIST) + FIELD_Y_BEGIN);
             grid[westDistX][distY] = PLAYER_WEST;
             grid[eastDistX][distY] = PLAYER_EAST;
             westTeamLoc[i][0] = westDistX;
@@ -136,40 +85,16 @@ public class SoccerGame extends AnimationTimer {
         /* places ball on the field and updates grid */
         ballX = (MAX_X / 2) - 1;
         ballY = (MAX_Y / 2) - 1;
-        // uses - 1 to center ball in the middle of the field
-        ball.relocate(FIELD_X_BEGIN + (GRID_DIST * ballX), FIELD_Y_BEGIN + (GRID_DIST * ballY));
         grid[ballX][ballY] = SOCCER_BALL;
 
-        if (SimulationPane.eastScore > 0 || SimulationPane.westScore > 0) {
-            Main.eastTeam.initializePoint();
-            Main.westTeam.initializePoint();
-
-            timer = 1;
-            resetGameTimer = PAUSE_TIMER;
-
-            /* starts game */
-            this.start();
-        }
-        else {
-            /* initialize game  called before game starts */
+        /* initialize game  called before game starts */
+        if (SimulationPane.eastScore == 0 && SimulationPane.westScore == 0) {
             Main.eastTeam.initializeGame();
             Main.westTeam.initializeGame();
         }
-    }
 
-    /**
-     * Check if all players are stuck.
-     *
-     * @return if all players are stuck true, otherwise false
-     */
-    private boolean isStuck() {
-        boolean stuck = true;
-        for (int i = 0; i < 4; ++i) {
-            if (!eastTeamStuck[i] || !westTeamStuck[i]) {
-                stuck = false;
-            }
-        }
-        return stuck;
+        Main.eastTeam.initializePoint();
+        Main.westTeam.initializePoint();
     }
 
     /**
@@ -224,16 +149,6 @@ public class SoccerGame extends AnimationTimer {
     }
 
     /**
-     * Prints localArea array. Used for testing
-     */
-    private void printPop() {
-        for (int i = 0; i < 9; ++i) {
-            System.out.print(localArea[i] + " ");
-        }
-        System.out.println();
-    }
-
-    /**
      * Determines direction of ball in relation to player.
      *
      * @param x coordinate of player
@@ -243,26 +158,227 @@ public class SoccerGame extends AnimationTimer {
      * @return direction of ball
      */
     private int ballDirectionCalc(int x, int y, int team) {
-        int dir = 0;
+        int newX, newY;
 
-        int r, s;
+        newX = findRealDirX(x, team);
+        newY = findRealDirY(y);
+
+        int dir = findDir(newX, newY);
+
+        if (localArea[dir] != EMPTY && dir != PLAYER) {
+            dir = findClosestDir(dir, team);
+        }
+
+        return dir;
+    }
+
+    /**
+     * Finds an open space closest to a ball direction.  Uses a stack to determine space.
+     *
+     * @param dir direction to ball
+     * @param team of player
+     *
+     * @return new direction to move
+     */
+    private int findClosestDir(int dir, int team) {
+        boolean[] local = convertToLocal();
+        int ballClosest = dirToStackDir(dir);
+
+        boolean blocked = true;
+        for (int i = 0; i < 8; ++i) {
+            if (local[i]) {
+                blocked = false;
+            }
+        }
+
+        if (blocked) {
+            return PLAYER;
+        }
+
+        Stack<Integer> stack = new Stack<Integer>();
+
+        int i = 1;
+        int index;
+        int newDir = ballClosest;
+        while (!local[newDir]) {
+            index = (ballClosest + i) % 8;
+            stack.add(index);
+
+            index = (ballClosest - i) % 8;
+            if (index < 0) {
+                index *= -1;
+            }
+            stack.add(index);
+
+            newDir = stack.pop();
+            i++;
+        }
+
+        newDir = stackDirToDir(newDir);
+
+        return newDir;
+    }
+
+    private int stackDirToDir(int stackDir) {
+        int newDir;
+        switch (stackDir) {
+            case 0 : newDir = NW;
+                break;
+            case 1 : newDir = N;
+                break;
+            case 2 : newDir = NE;
+                break;
+            case 7 : newDir = E;
+                break;
+            case 3 : newDir = W;
+                break;
+            case 4 : newDir = SW;
+                break;
+            case 5 : newDir = S;
+                break;
+            case 6 : newDir = SE;
+                break;
+            default: newDir = stackDir;
+                break;
+        }
+
+        return newDir;
+    }
+
+    /**
+     * Converts a dir into a dir compatible with the new direction algorithm
+     *
+     * @param dir old direction
+     *
+     * @return new direction
+     */
+    private int dirToStackDir(int dir) {
+        int newDir;
+        switch (dir) {
+            case NW : newDir = 0;
+                break;
+            case N : newDir = 1;
+                break;
+            case NE : newDir = 2;
+                break;
+            case E : newDir = 7;
+                break;
+            case W : newDir = 3;
+                break;
+            case SW : newDir = 4;
+                break;
+            case S : newDir = 5;
+                break;
+            case SE : newDir = 6;
+                break;
+            default: newDir = dir;
+                break;
+        }
+
+        return newDir;
+    }
+
+    /**
+     * Converts the localArea array into an array of booleans to used with the stack to determine new direction
+     *
+     * @return boolean array describing blocked local area
+     */
+    private boolean[] convertToLocal() {
+        boolean[] local = new boolean[8];
+
+        if (localArea[NW] == EMPTY) {
+            local[0] = true;
+        }
+        else {
+            local[0] = false;
+        }
+        if (localArea[N] == EMPTY) {
+            local[1] = true;
+        }
+        else {
+            local[1] = false;
+        }
+        if (localArea[NE] == EMPTY) {
+            local[2] = true;
+        }
+        else {
+            local[2] = false;
+        }
+        if (localArea[E] == EMPTY) {
+            local[3] = true;
+        }
+        else {
+            local[3] = false;
+        }
+        if (localArea[SE] == EMPTY) {
+            local[4] = true;
+        }
+        else {
+            local[4] = false;
+        }
+        if (localArea[S] == EMPTY) {
+            local[5] = true;
+        }
+        else {
+            local[5] = false;
+        }
+        if (localArea[SW] == EMPTY) {
+            local[6] = true;
+        }
+        else {
+            local[6] = false;
+        }
+        if (localArea[W] == EMPTY) {
+            local[7] = true;
+        }
+        else {
+            local[7] = false;
+        }
+
+        return local;
+    }
+
+    /**
+     * Finds the real x direction of the ball regardless of anything objects.  Basically a direct line to the team's
+     * kicking location.
+     *
+     * @param x coordinate of player
+     * @param team of player
+     *
+     * @return -1 if ball's x coordinate is less, 1 if greater, or 0 if level
+     */
+    private int findRealDirX(int x, int team) {
+        int r;
         if (team == PLAYER_WEST) {
             if (ballX - 1 > x)
-                r = 1;
+                r = -1;
             else if (ballX - 1 == x)
                 r = 0;
             else
-                r = -1;
+                r = 1;
         }
         else {
             if (ballX + 1 < x)
-                r = 1;
+                r = -1;
             else if (ballX + 1 == x)
                 r = 0;
             else
-                r = -1;
+                r = 1;
         }
 
+        return r;
+    }
+
+    /**
+     * Finds the real y direction of the ball regardless of anything objects.  Basically a direct line to the team's
+     * kicking location.
+     *
+     * @param y coordinate of player
+     *
+     * @return -1 if ball's y coordinate is less, 1 if greater, or 0 if level
+     */
+    private int findRealDirY(int y) {
+        int s;
         if (ballY < y)
             s = 1;
         else if (ballY == y)
@@ -270,134 +386,41 @@ public class SoccerGame extends AnimationTimer {
         else
             s = -1;
 
-        if (r == -1 && s == 1)
+        return s;
+    }
+
+    /**
+     * Finds the direction to move a player based the new x and y coordinate changes.
+     * Assume the the player is located at (0, 0).
+     *
+     * @param x coordinate change
+     * @param y coordinate change
+     *
+     * @return direction to move
+     */
+    private int findDir(int x, int y) {
+        int dir;
+
+        if (x == -1 && y == 1)
             dir = NW;
-        else if (r == 0 && s == 1)
+        else if (x == 0 && y == 1)
             dir = N;
-        else if (r == 1 && s == 1)
+        else if (x == 1 && y == 1)
             dir = NE;
-        else if (r == -1 && s == 0)
+        else if (x == -1 && y == 0)
             dir = E;
-        else if (r == 0 && s == 0)
+        else if (x == 0 && y == 0)
             dir = PLAYER;
-        else if (r == 1 && s == 0)
+        else if (x == 1 && y == 0)
             dir = W;
-        else if (r == -1 && s == -1)
+        else if (x == -1 && y == -1)
             dir = SW;
-        else if (r == 0 && s == -1)
+        else if (x == 0 && y == -1)
             dir = S;
-        else if (r == 1 && s == -1)
+        else //(r == 1 && s == -1)
             dir = SE;
 
         return dir;
-    }
-
-    /**
-     * Swaps directions for the east team.  Teams as if they are facing west and
-     * so the east side needs to be converted to go the other direction.
-     *
-     * @param direction to be switched
-     * @return new direction
-     */
-    public static int swapDir(int direction) {
-        switch(direction) {
-            case NW:
-                return (NE);
-            case N:
-                return (N);
-            case NE:
-                return (NW);
-            case E:
-                return (W);
-            case SE:
-                return (SW);
-            case S:
-                return (S);
-            case SW:
-                return (SE);
-            case W:
-                return (E);
-            case KICK:
-                return (KICK);
-            case PLAYER:
-                return (PLAYER);
-            default:
-                return (PLAYER);
-        }
-    }
-
-    /**
-     * Prints the locations of the players.  Used for testing.
-     */
-    private void printTeams() {
-        System.out.println("East Team");
-        for (int i = 0; i < 4; ++i) {
-            System.out.print(eastTeamLoc[i][0] + " " + eastTeamLoc[i][1] + "\n");
-        }
-        System.out.println("West Team");
-        for (int i = 0; i < 4; ++i) {
-            System.out.print(westTeamLoc[i][0] + " " + westTeamLoc[i][1] + "\n");
-        }
-    }
-
-    /**
-     * Prints the game grid.  Used for testing.
-     */
-    private void printGrid() {
-        for (int i = 0; i < MAX_Y; ++i) {
-            for (int j = 0; j < MAX_X; ++j) {
-                System.out.print(grid[j][i] + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    @Override
-    public void handle(long now) {
-        if (timer == 0) {
-            if (resetGameTimer == 0) {
-                Random random = new Random();
-
-                /* update players */
-                for (int i = 0; i < 4; ++i) {
-                    /* randomizes player movements */
-                    if (random.nextBoolean()) {
-                        if (updateEast(i)) {
-                            break;
-                        }
-                        if (updateWest(i)) {
-                            break;
-                        }
-                    } else {
-                        if (updateWest(i)) {
-                            break;
-                        }
-                        if (updateEast(i)) {
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            if (isStuck()) {
-                stop();
-                setGame();
-                resetGameTimer = PAUSE_TIMER;
-                if (SimulationPane.eastScore == 0 && SimulationPane.westScore == 0) {
-                    this.start();
-                }
-            }
-
-            timer = timeSetting;
-        }
-        else {
-            if (resetGameTimer > 0) {
-                resetGameTimer--;
-            }
-            else {
-                timer--;
-            }
-        }
     }
 
     /**
@@ -407,7 +430,8 @@ public class SoccerGame extends AnimationTimer {
      *
      * @return true if point was scored, otherwise false
      */
-    private boolean updateWest(int i) {
+    public boolean updateWest(int i) {
+        int playerMove = 0;
         populateLocalArea(westTeamLoc[i][0], westTeamLoc[i][1], PLAYER_WEST);
         ballDirection = ballDirectionCalc(westTeamLoc[i][0], westTeamLoc[i][1], PLAYER_WEST);
         switch (i) {
@@ -428,7 +452,7 @@ public class SoccerGame extends AnimationTimer {
                         westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
                 break;
         }
-        return updateBoard(west.get(i), PLAYER_WEST, i, westTeamLoc[i][0], westTeamLoc[i][1], playerMove);
+        return update(PLAYER_WEST, i, westTeamLoc[i][0], westTeamLoc[i][1], playerMove);
     }
 
     /**
@@ -438,7 +462,8 @@ public class SoccerGame extends AnimationTimer {
      *
      * @return true if point was scored, otherwise false
      */
-    private boolean updateEast(int i) {
+    public boolean updateEast(int i) {
+        int playerMove = 0;
         populateLocalArea(eastTeamLoc[i][0], eastTeamLoc[i][1], PLAYER_EAST);
         ballDirection = ballDirectionCalc(eastTeamLoc[i][0], eastTeamLoc[i][1], PLAYER_EAST);
         switch (i) {
@@ -459,14 +484,14 @@ public class SoccerGame extends AnimationTimer {
                         eastTeamLoc[i][0], eastTeamLoc[i][1], ballX, ballY);
                 break;
         }
-        return updateBoard(east.get(i), PLAYER_EAST, i, eastTeamLoc[i][0], eastTeamLoc[i][1], playerMove);
+
+        return update(PLAYER_EAST, i, eastTeamLoc[i][0], eastTeamLoc[i][1], playerMove);
     }
 
     /**
      * Updates positions of players on the board.  Does not move player if move is invalid.
      * Should be used with the return value of the individual player functions.
      *
-     * @param player Shape used to represent the player in the GUI
      * @param team team number in the grid
      * @param playerNumInLoc player number and index in player location array
      * @param beginX starting x of player
@@ -475,10 +500,10 @@ public class SoccerGame extends AnimationTimer {
      *
      * @return true if point was scored, otherwise false
      */
-    private boolean updateBoard(Shape player, int team, int playerNumInLoc, int beginX, int beginY, int dir) {
+    private boolean update(int team, int playerNumInLoc, int beginX, int beginY, int dir) {
         int x = 0, y = 0;
 
-        if (team == PLAYER_EAST) {
+        if (team == PLAYER_WEST) {
             dir = swapDir(dir);
         }
 
@@ -517,6 +542,12 @@ public class SoccerGame extends AnimationTimer {
                 break;
         }
 
+        /* Updates variable for gui */
+        playerIndex = playerNumInLoc;
+        moveX = beginX;
+        moveY = beginY;
+
+
         /* If the player tries to kick the ball and is in a valid spot */
         if (dir == KICK && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
                 (team == PLAYER_WEST && x == ballX - 1 && y == ballY))) {
@@ -527,7 +558,9 @@ public class SoccerGame extends AnimationTimer {
 
         if (x >= 0 && y >= 0 && x < MAX_X - 1 && y < MAX_Y - 1 &&
                 (grid[x][y] == EMPTY || (x == beginX && y == beginY))) {
-            player.relocate(FIELD_X_BEGIN + (x * GRID_DIST), FIELD_Y_BEGIN + (y * GRID_DIST));
+            /* Updates variables for GUI */
+            moveX = x;
+            moveY = y;
 
             /* update player grid */
             grid[beginX][beginY] = 0;
@@ -541,12 +574,8 @@ public class SoccerGame extends AnimationTimer {
             }
         }
         else {
-            if (team == PLAYER_EAST) {
-                eastTeamStuck[playerNumInLoc] = true;
-            }
-            else {
-                westTeamStuck[playerNumInLoc] = true;
-            }
+            /* No move is made. Should not be called */
+            //System.out.println("Error false move- " + team + ": player- " + playerNumInLoc);
         }
 
         return false;
@@ -595,8 +624,8 @@ public class SoccerGame extends AnimationTimer {
              }
         } while (grid[newBallX][newBallY] != 0);
 
-        /* Update GUI */
-        ball.relocate(FIELD_X_BEGIN + (GRID_DIST * newBallX), FIELD_Y_BEGIN + (GRID_DIST * newBallY));
+        /* Updates variables for GUI */
+        ballMoved = true;
 
         /* Update grid */
         grid[ballX][ballY] = 0;
@@ -606,21 +635,13 @@ public class SoccerGame extends AnimationTimer {
 
         /* Checks if point is scored and handles appropriately */
         if (ballX == 0) {
-            if (SimulationPane.eastScore == 6) {
-                gameWon(PLAYER_EAST);
-            }
             Main.eastTeam.wonPoint();
             Main.westTeam.lostPoint();
-            scoredPoint(PLAYER_EAST);
             won = true;
         }
         else if (ballX == MAX_X - 2) {
-            if (SimulationPane.westScore == 6) {
-                gameWon(PLAYER_WEST);
-            }
             Main.eastTeam.lostPoint();
             Main.westTeam.wonPoint();
-            scoredPoint(PLAYER_WEST);
             won = true;
         }
 
@@ -628,59 +649,141 @@ public class SoccerGame extends AnimationTimer {
     }
 
     /**
-     * Resets board and updates score.
+     * Swaps directions for the east team.  Teams as if they are facing west and
+     * so the east side needs to be converted to go the other direction.
      *
-     * @param team which scored
+     * @param direction to be switched
+     * @return new direction
      */
-    private void scoredPoint(int team) {
-        stop();
-
-        /* increments the score */
-        if (team == PLAYER_EAST) {
-            SimulationPane.eastScore++;
+    public static int swapDir(int direction) {
+        switch(direction) {
+            case NW:
+                return (NE);
+            case N:
+                return (N);
+            case NE:
+                return (NW);
+            case E:
+                return (W);
+            case SE:
+                return (SW);
+            case S:
+                return (S);
+            case SW:
+                return (SE);
+            case W:
+                return (E);
+            case KICK:
+                return (KICK);
+            case PLAYER:
+                return (PLAYER);
+            default:
+                return (PLAYER);
         }
-        else {
-            SimulationPane.westScore++;
-        }
-
-        SimulationPane.updateScore();
-
-        /* Pauses the game between points */
-        resetGameTimer = PAUSE_TIMER;
-        timer = timeSetting;
-        setGame();
     }
 
     /**
-     * Prints the winning message and ends the game.
+     * Called when the game is over.
      */
-    private void gameWon(int team) {
-        /* prints the winning message */
-        if (team == PLAYER_EAST) {
-            System.out.println("East Team: " + Main.eastTeam.teamName() + " won the game.");
-        }
-        else {
-            System.out.println("West Team: " + Main.westTeam.teamName() + " won the game.");
-        }
-
-        /* ends the game */
-        System.exit(0);
+    public void gameOver() {
+        Main.eastTeam.gameOver();
+        Main.westTeam.gameOver();
     }
 
     /**
-     * Restarts the game
+     * Prints the locations of the players.  Used for testing.
      */
-    public void restart() {
-        stop();
-
-        /* New team is loaded so scores are reset */
-        SimulationPane.eastScore = 0;
-        SimulationPane.westScore = 0;
-
-        setGame();
+    private void printTeams() {
+        System.out.println("East Team");
+        for (int i = 0; i < 4; ++i) {
+            System.out.print(eastTeamLoc[i][0] + " " + eastTeamLoc[i][1] + "\n");
+        }
+        System.out.println("West Team");
+        for (int i = 0; i < 4; ++i) {
+            System.out.print(westTeamLoc[i][0] + " " + westTeamLoc[i][1] + "\n");
+        }
     }
 
-    public void run() {
-        this.start();
+    /**
+     * Prints the game grid.  Used for testing.
+     */
+    private void printGrid() {
+        for (int i = 0; i < MAX_Y; ++i) {
+            for (int j = 0; j < MAX_X; ++j) {
+                System.out.print(grid[j][i] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Prints localArea array. Used for testing
+     */
+    private void printPop() {
+        for (int i = 0; i < 9; ++i) {
+            System.out.print(localArea[i] + " ");
+        }
+        System.out.println();
+    }
+
+    /**
+     * Getter for playerIndex.  Used for the GUI.
+     *
+     * @return playerIndex
+     */
+    public int getPlayerIndex() {
+        return playerIndex;
+    }
+
+    /**
+     * Getter for moveY.  Used for the GUI.
+     *
+     * @return moveY
+     */
+    public int getMoveY() {
+        return moveY;
+    }
+
+    /**
+     * Getter for moveX.  Used for the GUI.
+     *
+     * @return moveX
+     */
+    public int getMoveX() {
+        return moveX;
+    }
+
+    /**
+     * Getter for ballMoved.  Used for the GUI.
+     *
+     * @return ballMoved
+     */
+    public boolean getBallMoved() {
+        return ballMoved;
+    }
+
+    /**
+     * Updates the move ball variable after the GUI updates.
+     */
+    public void movedBall() {
+        ballMoved = false;
+    }
+
+    /**
+     * Getter for ballX.  Used for the GUI.
+     *
+     * @return ballX
+     */
+    public int getBallX() {
+        return ballX;
+    }
+
+    /**
+     * Getter for ballY.  Used for the GUI.
+     *
+     * @return ballY
+     */
+    public int getBallY() {
+        return ballY;
     }
 }
