@@ -6,15 +6,15 @@ This is the soccer simulator for 4210.  Feel free to make changes as you see fit
 
 You will need java 8.
 
-To compile use the command `./sbt compile` while in the parent directory.
+To compile use command `make`.  All files need to be in the same directory.
 
 ## Running
 
-To run the program use the command `./sbt run`.
+To run the program use the command `java Main`.
 
 ## Entering Teams
 
-A sample team has been included, BrutalBeaters.  To add your own team, you must implement the Team interface located in `src/main/java`.  Place the compiled `.class` file in the parent directory and your source code in `src/main/java`.  Hopefully we will remove this dependancy on the source code by classtime.
+A sample team has been included, BrutalBeaters.  To add your own team, implement the Team interface in your team and place the compliled `.class` file into the same file where the source code is located.
 
 ## Rules
  

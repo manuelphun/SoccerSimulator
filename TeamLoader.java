@@ -68,7 +68,7 @@ public class TeamLoader {
         for (int i = 0; i < files.length; ++i) {
             if (files[i].isFile()) {
                 fileName = files[i].getName();
-                if (fileName.endsWith(".class")) {
+                if (isTeamFile(fileName)) {
                     teamFilesList.add(fileName);
                 }
             }
@@ -83,6 +83,24 @@ public class TeamLoader {
 
         return teamFiles;
     }
+
+    /**
+     * Finds all the team .class files
+     *
+     * @param fileName to check
+     *
+     * @return is a team .class file
+     */
+    private boolean isTeamFile(String fileName) {
+	if (fileName.endsWith(".class")) {
+	    if (!fileName.equals("Main.class") && !fileName.equals("SimulationPane.class") && !fileName.equals("SoccerBatch.class") && !fileName.equals("SoccerGUI.class") && !fileName.equals("SoccerGame.class") && !fileName.equals("Team.class") && !fileName.equals("TeamLoader.class") && !fileName.equals("SimulationPane$1.class") && !fileName.equals("SimulationPane$2.class") && !fileName.equals("SimulationPane$3.class") && !fileName.equals("SimulationPane$4.class")) {
+		return true;
+	    }
+	}
+
+	return false;
+    }
+	    
 
     /**
      * Dynamically loads Team classes into the program. Classes are
