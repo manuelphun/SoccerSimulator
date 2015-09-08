@@ -93,7 +93,7 @@ public class TeamLoader {
      * @param teamName String array of .class file names
      */
     private void loadTeams(String[] teamName) {
-        ClassLoader classLoader = SimulationPane.class.getClassLoader();
+        ClassLoader classLoader = TeamLoader.class.getClassLoader();
         teamClass = new ArrayList<Class<Team>>();
         String name, packageName;
 

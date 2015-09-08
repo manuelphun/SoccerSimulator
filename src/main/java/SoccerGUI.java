@@ -146,7 +146,6 @@ public class SoccerGUI extends AnimationTimer {
                 }
             }
 
-            System.out.println();
             timer = timeSetting;
         }
         else {
