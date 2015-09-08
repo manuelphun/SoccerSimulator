@@ -14,5 +14,10 @@ To run the program use the command `./sbt run`.
 
 ## Entering Teams
 
-Two sample teams have been included, BrutalBeaters and the default team NowhereNancy.  To add your own team, you must implement the Team interface located in `src/main/java`.  Place the compiled `.class` file in the parent directory.
+A sample team has been included, BrutalBeaters.  To add your own team, you must implement the Team interface located in `src/main/java`.  Place the compiled `.class` file in the parent directory and your source code in `src/main/java`.  Hopefully we will remove this dependancy on the source code by classtime.
+
+## Rules
+ 
+1. Teams may not block an opponents kicking position.
+2. Infinite loops within teams are prohibitted.
 
