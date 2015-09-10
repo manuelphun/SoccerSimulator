@@ -577,7 +577,7 @@ public class SoccerGame {
 
         /* If the player tries to kick the ball and is in a valid spot */
         if (validKick(dir, x, y)) {
-            if (kickBallRandom(team, dir)) {
+            if (kickBall(team, dir)) {
                 return true;
             }
         }
@@ -780,6 +780,10 @@ public class SoccerGame {
         if(grid[newX][newY] == 0) { // Check to make sure the space is empty, if so move the ball to the space
             grid[origX][origY] = EMPTY;
             grid[newX][newY] = SOCCER_BALL;
+	    /* test */
+	    ballX = newX;
+	    ballY = newY;
+
             moveBallWithStops(newX, newY, goalX, goalY);
         } else {
             // If the space is blocked or invalid, do nothing
