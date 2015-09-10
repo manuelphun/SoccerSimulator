@@ -5,8 +5,6 @@ import java.util.Stack;
 /**
  * Created by Grant Cooksey on 8/25/15.
  * Purpose: Maintains the Soccer Simulation.  Provides methods to update the game based on the player algorithms.
- *
- * TODO Reflect ballxy and playerxy for west
  */
 public class SoccerGame {
 
@@ -174,7 +172,7 @@ public class SoccerGame {
         int dir = findDir(newX, newY);
 
         if (localArea[dir] != EMPTY && dir != PLAYER) {
-            dir = findClosestDir(dir, team);
+            dir = findClosestDir(dir);
         }
 
         return dir;
@@ -184,11 +182,10 @@ public class SoccerGame {
      * Finds an open space closest to a ball direction.  Uses a stack to determine space.
      *
      * @param dir direction to ball
-     * @param team of player
      *
      * @return new direction to move
      */
-    private int findClosestDir(int dir, int team) {
+    private int findClosestDir(int dir) {
         boolean[] local = convertToLocal();
         int ballClosest = dirToStackDir(dir);
 
@@ -641,43 +638,43 @@ public class SoccerGame {
         Random random = new Random();
         boolean won = false;
 
-        /* Finds new random ball location in direction of kicking team */
-         do {
-             newBallX = 3 + random.nextInt(5);
-             newBallY = random.nextInt(4);
-
-             if (team == PLAYER_EAST) {
-                 newBallX *= -1;
-             }
-
-             if (random.nextBoolean()) {
-                 newBallY *= -1;
-             }
-
-             newBallX += ballX;
-             newBallY += ballY;
-
-             if (newBallX < 0) {
-                 newBallX = 0;
-             }
-             else if (newBallX >= MAX_X - 2) {
-                 newBallX = MAX_X - 2;
-             }
-
-             if (newBallY < 0) {
-                 newBallY = 0;
-             }
-             else if (newBallY >= MAX_Y - 2) {
-                 newBallY = MAX_Y - 2;
-             }
+	/* Finds new random ball location in direction of kicking team */
+	do {
+	    newBallX = 3 + random.nextInt(5);
+	    newBallY = random.nextInt(4);
+	    
+	    if (team == PLAYER_EAST) {
+		newBallX *= -1;
+	    }
+	    
+	    if (random.nextBoolean()) {
+		newBallY *= -1;
+	    }
+	    
+	    newBallX += ballX;
+	    newBallY += ballY;
+	    
+	    if (newBallX < 0) {
+		newBallX = 0;
+	    }
+	    else if (newBallX >= MAX_X - 2) {
+		newBallX = MAX_X - 2;
+	    }
+	    
+	    if (newBallY < 0) {
+		newBallY = 0;
+	    }
+	    else if (newBallY >= MAX_Y - 2) {
+		newBallY = MAX_Y - 2;
+	    }
         } while (grid[newBallX][newBallY] != 0);
-
+       
         /* Updates variables for GUI */
-        ballMoved = true;
+	ballMoved = true;
 
         /* Update grid */
         /* Randomly choose whether or not to warp or stop ball. 60% chance of stopping ball */
-        double warpsVal = Math.random();
+	double warpsVal = Math.random();
         if(warpsVal < 0.6) 
             moveBallWithStops(ballX, ballY, newBallX, newBallY);
         else {
@@ -686,6 +683,66 @@ public class SoccerGame {
             ballX = newBallX;
             ballY = newBallY;
         }
+	
+        /* Checks if point is scored and handles appropriately */
+        if (ballX == 0) {
+            Main.eastTeam.wonPoint();
+            Main.westTeam.lostPoint();
+            won = true;
+        }
+        else if (ballX == MAX_X - 2) {
+            Main.eastTeam.lostPoint();
+            Main.westTeam.wonPoint();
+            won = true;
+        }
+	
+        return won;
+    } 
+
+    private boolean kickBallRandom(int team, int dir) {
+        int newBallX = 0, newBallY = 0;
+        Random random = new Random();
+        boolean won = false;
+
+        /* Finds new random ball location in direction of kicking team */
+	do {
+	    newBallX = 3 + random.nextInt(5);
+	    newBallY = random.nextInt(4);
+
+	    if (team == PLAYER_EAST) {
+		newBallX *= -1;
+	    }
+
+	    if (random.nextBoolean()) {
+		newBallY *= -1;
+	    }
+
+	    newBallX += ballX;
+	    newBallY += ballY;
+
+	    if (newBallX < 0) {
+		newBallX = 0;
+	    }
+	    else if (newBallX >= MAX_X - 2) {
+		newBallX = MAX_X - 2;
+	    }
+
+	    if (newBallY < 0) {
+		newBallY = 0;
+	    }
+	    else if (newBallY >= MAX_Y - 2) {
+		newBallY = MAX_Y - 2;
+	    }
+        } while (grid[newBallX][newBallY] != 0);
+
+        /* Updates variables for GUI */
+        ballMoved = true;
+
+        /* Update grid */
+        grid[ballX][ballY] = 0;
+        grid[newBallX][newBallY] = SOCCER_BALL;
+        ballX = newBallX;
+        ballY = newBallY;
 
         /* Checks if point is scored and handles appropriately */
         if (ballX == 0) {

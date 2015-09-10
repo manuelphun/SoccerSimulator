@@ -85,7 +85,6 @@ public class SimulationPane extends VBox {
         resetButton.setOnAction(new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent t) {
 		    simulation.reset();
-		    System.out.println("New Team");
 		}
 	    });
         hBox.setAlignment(Pos.CENTER);
