@@ -26,4 +26,5 @@ clean:
 	$(RM) Team.class
 	$(RM) TeamLoader.class
 	$(RM) SimulationPane\$$*
+	$(RM) SoccerBatch\$$*
 	$(RM) *~

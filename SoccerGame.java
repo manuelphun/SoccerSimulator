@@ -577,7 +577,7 @@ public class SoccerGame {
 
         /* If the player tries to kick the ball and is in a valid spot */
         if (validKick(dir, x, y)) {
-            if (kickBall(team, dir)) {
+            if (kickBallRandom(team, dir)) {
                 return true;
             }
         }

@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Grant Cooksey on 9/6/15.
@@ -15,7 +18,8 @@ public class SoccerBatch {
         teamLoader = new TeamLoader();
 
         System.out.println("Batch processing of all teams enabled.");
-        System.out.print("Please enter how many times you wish to each team to play each other as an integer: ");
+	System.out.println("All teams will play each other twice per round, switching field sides every game.");
+        System.out.print("Please enter how many rounds you wish to play as an integer: ");
 
         /* determines how many times each team will play each other. */
         int playIterations;
@@ -33,6 +37,8 @@ public class SoccerBatch {
 
         int[] winCount = simulateGames(playIterations);
         printWins(winCount);
+
+	System.exit(0);
     }
 
     /**
@@ -150,7 +156,32 @@ public class SoccerBatch {
             return SoccerGame.PLAYER_WEST;
         }
     }
-
+    
+    public class TeamScore implements Comparable<TeamScore> {
+	int wins;
+	String name;
+	public TeamScore(String n, int w) {
+	    wins = w;
+	    name = n;
+	}
+	
+	public String getName() {
+	    return name;
+	}
+	
+	public Integer getWins() {
+	    return new Integer(wins);
+	}
+	
+	public int compareTo(TeamScore t) {
+	    return this.getWins().compareTo(t.getWins());
+	}
+	
+	public String toString() {
+	    return name + "\t\t" + wins;
+	}
+    }
+    
     /**
      * Prints the wins from the simulator.
      *
@@ -158,9 +189,16 @@ public class SoccerBatch {
      */
     private void printWins(int[] winCount) {
         String[] teamNames = teamLoader.getTeamNames();
-        System.out.println("Team Names\tWins");
+        System.out.println("Team Names\t\tWins");
+	
+	List<TeamScore> ts = new ArrayList<TeamScore>();
         for (int i = 0; i < winCount.length; ++i) {
-            System.out.println(teamNames[i] + "\t" + winCount[i]);
-        }
+            ts.add(new TeamScore(teamNames[i], winCount[i]));
+	}
+
+	Collections.sort(ts, Collections.reverseOrder());
+	for (int i = 0; i < ts.size(); ++i) {
+	    System.out.println(ts.get(i));
+	}
     }
 }
