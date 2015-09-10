@@ -25,7 +25,7 @@ clean:
 	$(RM) SoccerGame.class
 	$(RM) Team.class
 	$(RM) TeamLoader.class
-	$(RM) SimulationPane$$1.class
-	$(RM) SimulationPane$$2.class
-	$(RM) SimulationPane$$3.class
-	$(RM) SimulationPane$$4.class
+	$(RM) SimulationPane\$$1.class
+	$(RM) SimulationPane\$$2.class
+	$(RM) SimulationPane\$$3.class
+	$(RM) SimulationPane\$$4.class

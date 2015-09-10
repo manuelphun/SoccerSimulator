@@ -5,6 +5,8 @@ import java.util.Stack;
 /**
  * Created by Grant Cooksey on 8/25/15.
  * Purpose: Maintains the Soccer Simulation.  Provides methods to update the game based on the player algorithms.
+ *
+ * TODO Reflect ballxy and playerxy for west
  */
 public class SoccerGame {
 
@@ -21,6 +23,10 @@ public class SoccerGame {
     protected static final int KICK_N = 10;
     protected static final int KICK_W = 11;
     protected static final int KICK_S = 12;
+    protected static final int KICK_NE = 13;
+    protected static final int KICK_SE = 14;
+    protected static final int KICK_SW = 15;
+    protected static final int KICK_NW = 16;
 
     protected static final int NW = 0;
     protected static final int N = 1;
@@ -354,18 +360,18 @@ public class SoccerGame {
         if (team == PLAYER_WEST) {
             if (ballX - 1 > x)
                 r = -1;
-            else if (ballX - 1 == x)
-                r = 0;
-            else
+            else if (ballX + 1 < x)
                 r = 1;
+            else
+                r = 0;
         }
         else {
             if (ballX + 1 < x)
                 r = -1;
-            else if (ballX + 1 == x)
-                r = 0;
-            else
+            else if (ballX - 1 > x)
                 r = 1;
+            else
+                r = 0;
         }
 
         return r;
@@ -381,12 +387,12 @@ public class SoccerGame {
      */
     private int findRealDirY(int y) {
         int s;
-        if (ballY < y)
+        if (ballY + 1 < y)
             s = 1;
-        else if (ballY == y)
-            s = 0;
-        else
+        else if (ballY - 1 > y)
             s = -1;
+        else
+            s = 0;
 
         return s;
     }
@@ -551,8 +557,7 @@ public class SoccerGame {
 
 
         /* If the player tries to kick the ball and is in a valid spot */
-        if (dir == KICK_E && ((team == PLAYER_EAST && x == ballX + 1 && y == ballY) ||
-                (team == PLAYER_WEST && x == ballX - 1 && y == ballY))) {
+        if (validKick(dir, x, y)) {
             if (kickBall(team, dir)) {
                 return true;
             }
@@ -581,6 +586,24 @@ public class SoccerGame {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if a player is a valid kicking location.  Returns true, otherwise, false.
+     *
+     * @param dir of player move
+     * @param coordinate of player on x axis
+     * @param coordinate of player on y axis
+     *
+     * @return true is in kicking position, otherwise false
+     */
+    private boolean validKick(int dir, int x, int y) {
+	if (dir >= KICK_E && dir <= KICK_S && x >= ballX - 1 && x <= ballX + 1 &&
+	    y >= ballY - 1 && y <= ballY + 1) {
+	    return true;
+	}
+	
+	return false;
     }
 
     /**
@@ -631,10 +654,16 @@ public class SoccerGame {
         ballMoved = true;
 
         /* Update grid */
-        grid[ballX][ballY] = 0;
-        grid[newBallX][newBallY] = SOCCER_BALL;
-        ballX = newBallX;
-        ballY = newBallY;
+        /* Randomly choose whether or not to warp or stop ball. 60% chance of stopping ball */
+        double warpsVal = Math.random();
+        if(warpsVal < 0.6) 
+            moveBallWithStops(ballX, ballY, newBallX, newBallY);
+        else {
+            grid[ballX][ballY] = EMPTY;
+            grid[newBallX][newBallY] = SOCCER_BALL;
+            ballX = newBallX;
+            ballY = newBallY;
+        }
 
         /* Checks if point is scored and handles appropriately */
         if (ballX == 0) {
@@ -649,6 +678,43 @@ public class SoccerGame {
         }
 
         return won;
+    }
+    
+    /**
+     * Recursively moves the ball in the given direction. If it hits something or hits an invalid space it stops.
+     *
+     * @param original x position of the ball
+     * @param original y position of the ball
+     * @param goal x position of the ball
+     * @param goal y position of the ball
+     */
+    private void moveBallWithStops(int origX, int origY, int goalX, int goalY) {
+        int newX = origX;
+        int newY = origY;
+        double slope = (goalY - origY) / (goalX - goalY);
+
+        if(slope > 1) // Go vertically one space towards goal location
+            newY = origY + getSign(goalY - origY);
+        else // Go horizontally one space towards goal location
+            newX = origX + getSign(goalX - origX);
+
+        if(grid[newX][newY] == 0) { // Check to make sure the space is empty, if so move the ball to the space
+            grid[origX][origY] = EMPTY;
+            grid[newX][newY] = SOCCER_BALL;
+            moveBallWithStops(newX, newY, goalX, goalY);
+        } else {
+            // If the space is blocked or invalid, do nothing
+        }
+    }
+    
+    /* @param number to get sign returned */
+    private int getSign(int num) {
+        if(num > 0)
+            return 1;
+        if(num < 0)
+            return -1;
+        else 
+            return 0;
     }
 
     /**

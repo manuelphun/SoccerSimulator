@@ -30,6 +30,10 @@ public interface Team {
     public static final int KICK_N = 10;
     public static final int KICK_W = 11;
     public static final int KICK_S = 12;
+    public static final int KICK_NE = 13;
+    public static final int KICK_SE = 14;
+    public static final int KICK_SW = 15;
+    public static final int KICK_NW = 16;
 
     public static final int NW = 0;
     public static final int N = 1;
