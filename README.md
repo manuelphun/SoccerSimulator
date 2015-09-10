@@ -18,6 +18,9 @@ A sample team has been included, BrutalBeaters.  To add your own team, implement
 
 ## Rules
  
-1. Teams may not block an opponents kicking position.
-2. Infinite loops within teams are prohibitted.
+1. Infinite loops within teams are prohibitted.
+
+## Batch Simulation
+
+The program handles batch simulation of all the valid teams in the file.  Teams should be entered in the same manner.  To start the batch operations feature, run the program using the command `java Main batch` and follow the directions.
 
