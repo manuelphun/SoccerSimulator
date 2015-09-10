@@ -261,7 +261,24 @@ public class SoccerGUI extends AnimationTimer {
         setGame();
     }
 
+    /**
+     * starts the game.
+     */
     public void run() {
         this.start();
+    }
+
+    /**
+     * Resets the current game without changing score.
+     */
+    public void reset() {
+        stop();
+        setGame();
+        
+        resetGameTimer = PAUSE_TIMER;
+        timer = timeSetting;
+        if (SimulationPane.eastScore == 0 && SimulationPane.westScore == 0) {
+            run();
+        }
     }
 }

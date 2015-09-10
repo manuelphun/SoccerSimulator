@@ -432,6 +432,20 @@ public class SoccerGame {
     }
 
     /**
+     * flips the x coodinate so that the west player's team functions will think
+     * it is on the east side.
+     *
+     * @param x coordinate to be flipped
+     *
+     * @return new x coordinate
+     */
+    private int mirrorWestX(int x) {
+	int newX = (MAX_X - 2) - x;
+
+	return newX;
+    }
+
+    /**
      * Updates and moves west player
      *
      * @param i index of player int west team
@@ -445,19 +459,27 @@ public class SoccerGame {
         switch (i) {
             case 0:
                 playerMove = Main.westTeam.player1(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
+						   mirrorWestX(westTeamLoc[i][0]), 
+						   westTeamLoc[i][1], 
+						   mirrorWestX(ballX), ballY);
                 break;
             case 1:
                 playerMove = Main.westTeam.player2(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
+						   mirrorWestX(westTeamLoc[i][0]), 
+						   westTeamLoc[i][1], 
+						   mirrorWestX(ballX), ballY);
                 break;
             case 2:
                 playerMove = Main.westTeam.player3(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
+						   mirrorWestX(westTeamLoc[i][0]), 
+						   westTeamLoc[i][1], 
+						   mirrorWestX(ballX), ballY);
                 break;
             case 3:
                 playerMove = Main.westTeam.player4(localArea, ballDirection,
-                        westTeamLoc[i][0], westTeamLoc[i][1], ballX, ballY);
+						   mirrorWestX(westTeamLoc[i][0]), 
+						   westTeamLoc[i][1], 
+						   mirrorWestX(ballX), ballY);
                 break;
         }
         return update(PLAYER_WEST, i, westTeamLoc[i][0], westTeamLoc[i][1], playerMove);

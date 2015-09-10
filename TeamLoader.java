@@ -93,7 +93,7 @@ public class TeamLoader {
      */
     private boolean isTeamFile(String fileName) {
 	if (fileName.endsWith(".class")) {
-	    if (!fileName.equals("Main.class") && !fileName.equals("SimulationPane.class") && !fileName.equals("SoccerBatch.class") && !fileName.equals("SoccerGUI.class") && !fileName.equals("SoccerGame.class") && !fileName.equals("Team.class") && !fileName.equals("TeamLoader.class") && !fileName.equals("SimulationPane$1.class") && !fileName.equals("SimulationPane$2.class") && !fileName.equals("SimulationPane$3.class") && !fileName.equals("SimulationPane$4.class")) {
+	    if (!fileName.equals("Main.class") && !fileName.equals("SimulationPane.class") && !fileName.equals("SoccerBatch.class") && !fileName.equals("SoccerGUI.class") && !fileName.equals("SoccerGame.class") && !fileName.equals("Team.class") && !fileName.equals("TeamLoader.class") && !fileName.startsWith("SimulationPane$")) {
 		return true;
 	    }
 	}

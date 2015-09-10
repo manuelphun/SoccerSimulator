@@ -81,8 +81,15 @@ public class SimulationPane extends VBox {
             }
         });
         //stopButton.setOnAction(e -> simulation.stop());
+	Button resetButton = new Button("Reset");
+        resetButton.setOnAction(new EventHandler<ActionEvent>() {
+		public void handle(ActionEvent t) {
+		    simulation.reset();
+		    System.out.println("New Team");
+		}
+	    });
         hBox.setAlignment(Pos.CENTER);
-        hBox.getChildren().addAll(playButton, stopButton);
+        hBox.getChildren().addAll(playButton, stopButton, resetButton);
 
         /* combobox to select speed of simulation */
         ComboBox<String> selectSpeed = new ComboBox<String>();
